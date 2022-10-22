@@ -7,7 +7,7 @@
 */
 
 #include <stdint.h>
-//#include "stm32f407xx.h"
+#include "stm32f407xx.h"
 
 #define PBA 0x40000000 // peripheral Base Address
 #define PBA_AHB1 (PBA+0x20000) // AHB1 PBA
@@ -20,9 +20,19 @@
 //#define GPIOA_BASE (PBA_AHB1+0x0) // порт с клавишей PA0 (без смещения)
 #define GPIOA ((GPIO_TypeDef *) GPIOA_BASE)
 
+/*
 //настройка частоты
 #define HCLK
 #define AHB1
+*/
+#define HCLK		168000000
+#define SysTicksClk	20000
+#define SysTicks	HCLK/SysTicksClk
+
+void delay_ms(uint16_t delay);
+
+uint16_t delay_count=0;
+
 
 
 /*
@@ -48,15 +58,17 @@ int main(void)
 {
 	FLASH->ACR = 0x101; //flash latency
 	//RCC->CR |= RCC_CR_HSEON;
-	RCC->CR |= 1<<0;  //устанавливаем 0-йбит для включения HSI
-	while (!(RCC->CR & (1<<1))); //читаем сr ready пока не будет готов
+	//RCC->CR |= 1<<0;  //устанавливаем 0-йбит для включения HSI
+	//while (!(RCC->CR & (1<<1))); //читаем сr ready пока не будет готов
 	RCC->PLLCFGR |= 8<<0; //PLLM
-	RCC->PLLCFGR |= 150<<6; //PLLN
+	RCC->PLLCFGR |= 336<<6; //PLLN
 	RCC->PLLCFGR |= 2<<16; //PLLP
-	RCC->PLLCFGR |= 0b00<<22; //PLLSRC
+	RCC->PLLCFGR |= 1<<22; //PLLSRC
 
-	RCC->CFGR |= 0b00; // system clock switch -> HSI
-	RCC->CFGR |= (0x2<<2); // PLL_P selected as system clock
+	RCC->CR |= 1<<16;  //устанавливаем 16-йбит для включения HSE
+	while (!(RCC->CR & (1<<17))); //читаем сr ready пока HSE_RDY не будет готов
+	RCC->CFGR |= 0b01; // system clock switch -> HSE
+	//RCC->CFGR |= (0b10<<2); // PLL_P selected as system clock (sitch status)
 
 	RCC->CFGR |= (0x1<<4); // предделитель AHB в HPRE
 	RCC->CFGR |= (0x4<<10); // предделитель APB1 в PPRE1
@@ -78,6 +90,7 @@ int main(void)
 
 		if ((GPIOA->IDR & (1<<0)) != 0){
 			GPIOD->ODR |= 1<<15;
+			delay_ms(10000);
 		}
 		else {
 			GPIOD->ODR &= ~(1<<15);
@@ -89,6 +102,11 @@ int main(void)
 
 void SysTick_Handler(void)
 {
-	//SysTick Interrupt handler
+	if (delay_count>0){delay_count--;}
 }
 
+void delay_ms(uint16_t delay)
+{
+	delay_count = delay;
+	while(delay_count) {};
+}
