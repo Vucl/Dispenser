@@ -20,20 +20,14 @@
 //#define GPIOA_BASE (PBA_AHB1+0x0) // порт с клавишей PA0 (без смещения)
 #define GPIOA ((GPIO_TypeDef *) GPIOA_BASE)
 
-/*
 //настройка частоты
-#define HCLK
-#define AHB1
-*/
 #define HCLK		168000000
-#define SysTicksClk	20000
+#define SysTicksClk	1000
 #define SysTicks	HCLK/SysTicksClk
 
 void delay_ms(uint16_t delay);
 
 uint16_t delay_count=0;
-
-
 
 /*
 typedef struct
@@ -56,23 +50,33 @@ typedef struct
 
 int main(void)
 {
-	FLASH->ACR = 0x101; //flash latency
-	//RCC->CR |= RCC_CR_HSEON;
+	FLASH->ACR |= FLASH_ACR_LATENCY_5WS; // 5 в latency
+	//RCC->CR |= 1<<16;  //устанавливаем 16-йбит для включения HSE
+	RCC->CR |= RCC_CR_HSEON;
 	//RCC->CR |= 1<<0;  //устанавливаем 0-йбит для включения HSI
-	//while (!(RCC->CR & (1<<1))); //читаем сr ready пока не будет готов
-	RCC->PLLCFGR |= 8<<0; //PLLM
-	RCC->PLLCFGR |= 336<<6; //PLLN
-	RCC->PLLCFGR |= 2<<16; //PLLP
+	while (!(RCC->CR & (1<<17))); //читаем сr ready пока не будет готов
+
+	RCC->CFGR |= RCC_CFGR_HPRE_DIV1; // AHB в HPRE
+	RCC->CFGR |= RCC_CFGR_PPRE1_DIV4; // APB1 в PPRE1
+	RCC->CFGR |= RCC_CFGR_PPRE2_DIV2; // APB2 в PPRE2
+
+	RCC->PLLCFGR &= ~ RCC_PLLCFGR_PLLM_Msk;
+	RCC->PLLCFGR &= ~ RCC_PLLCFGR_PLLN_Msk;
+	RCC->PLLCFGR &= ~ RCC_PLLCFGR_PLLP_Msk;
+	RCC->PLLCFGR &= ~ RCC_PLLCFGR_PLLSRC_Msk;
+	//RCC->CFGR |= 1<<24; // PLL_P selected as system clock
+
+	RCC->PLLCFGR |= RCC_PLLCFGR_PLLSRC_HSE;
+
+	RCC->PLLCFGR |= 4<<0; //PLLM
+	RCC->PLLCFGR |= 168<<6; //PLLN
+	//C->PLLCFGR |= 2<<0; //PLLP
 	RCC->PLLCFGR |= 1<<22; //PLLSRC
+	//RCC->CFGR |= RCC_CFGR_SWS_PLL;
 
-	RCC->CR |= 1<<16;  //устанавливаем 16-йбит для включения HSE
-	while (!(RCC->CR & (1<<17))); //читаем сr ready пока HSE_RDY не будет готов
-	RCC->CFGR |= 0b01; // system clock switch -> HSE
-	//RCC->CFGR |= (0b10<<2); // PLL_P selected as system clock (sitch status)
-
-	RCC->CFGR |= (0x1<<4); // предделитель AHB в HPRE
-	RCC->CFGR |= (0x4<<10); // предделитель APB1 в PPRE1
-	RCC->CFGR |= (0x2<<13); // предделитель APB2 в PPRE2
+	RCC->CR |= RCC_CR_PLLON;
+	while (!(RCC->CR & RCC_CR_PLLON));
+	RCC->CFGR |= RCC_CFGR_SW_PLL;
 
 	//RCC->AHB1ENR |= 0b11111111; //вкл все порты ввода-вывода
 	RCC->AHB1ENR |= 0b11<<21; //вкл DMA, на всякий :|
@@ -90,7 +94,7 @@ int main(void)
 
 		if ((GPIOA->IDR & (1<<0)) != 0){
 			GPIOD->ODR |= 1<<15;
-			delay_ms(10000);
+			delay_ms(1000);
 		}
 		else {
 			GPIOD->ODR &= ~(1<<15);
