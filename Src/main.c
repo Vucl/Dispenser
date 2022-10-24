@@ -26,6 +26,7 @@
 #define SysTicks	HCLK/SysTicksClk
 
 void delay_ms(uint16_t delay);
+void timInit(void);
 
 uint16_t delay_count=0;
 
@@ -83,6 +84,8 @@ int main(void)
 
 	SysTick_Config(SysTicks);
 
+	timInit();
+
 	*((uint32_t*)0x40023830)|=0b1001; // RCC_AHB1ENR GPIODEN GPIOAEN
 	GPIOD->MODER |= (1<<24) | (1<<26) | (1<<28) | (1<<30); //пины leds на вывод
 	//GPIOD->MODER |= 0x55000000;
@@ -102,6 +105,14 @@ int main(void)
 
 		__asm("nop");
 	}
+}
+
+void timInit()
+{
+	TIM4->CR1 |= TIM_CR1_ARPE; // включить авто перегрузку
+	TIM4->CCER |= TIM_CCER_CC1E; //вкл режим захвата/сравнения
+	TIM4->CR1 |= TIM_CR1_CEN; //включение таймера
+
 }
 
 void SysTick_Handler(void)

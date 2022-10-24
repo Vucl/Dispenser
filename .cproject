@@ -46,6 +46,8 @@
 									<listOptionValue builtIn="false" value="../Inc"/>
 									<listOptionValue builtIn="false" value="&quot;E:\STM32CubeIDE\workspace_1.10.1\libs\CMSIS\Include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;E:\STM32CubeIDE\workspace_1.10.1\libs\CMSIS\Device\ST\STM32F4xx\Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\Workspace\STM32CubeIDE\CMSIS\Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;D:\Workspace\STM32CubeIDE\CMSIS\Device\ST\STM32F4xx\Include&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1136392440" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
