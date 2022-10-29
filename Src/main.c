@@ -112,7 +112,8 @@ void timInit()
 	TIM4->CR1 |= TIM_CR1_ARPE; // включить авто перегрузку
 	TIM4->CCER |= TIM_CCER_CC1E; //вкл режим захвата/сравнения
 	TIM4->CR1 |= TIM_CR1_CEN; //включение таймера
-
+	TIM4->DIER |= TIM_DIER_CC1IE; //прерывание захвата/сравнения
+	//TIM4->SR |=
 }
 
 void SysTick_Handler(void)
