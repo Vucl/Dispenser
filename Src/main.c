@@ -109,11 +109,15 @@ int main(void)
 
 void timInit()
 {
+	GPIOA->MODER |= (0b11<<4); //PA2 альтернативная функция
+	//GPIOA->AFR  //тип альтернативной функции
+
+	TIM4->CCMR1 |= TIM_CCMR1_OC1M;
 	TIM4->CR1 |= TIM_CR1_ARPE; // включить авто перегрузку
 	TIM4->CCER |= TIM_CCER_CC1E; //вкл режим захвата/сравнения
-	TIM4->CR1 |= TIM_CR1_CEN; //включение таймера
 	TIM4->DIER |= TIM_DIER_CC1IE; //прерывание захвата/сравнения
 	//TIM4->SR |=
+	TIM4->CR1 |= TIM_CR1_CEN; //включение таймера
 }
 
 void SysTick_Handler(void)
