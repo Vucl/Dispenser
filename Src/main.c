@@ -112,14 +112,24 @@ void timInit()
 	GPIOE->MODER |= (0b11<<18); //PE9 альтернативная функция
 	GPIOE->AFR[1] |= (0b1<<4);  //тип альтернативной функции AF2 TIM1_CH1
 
+	//GPIOE->CRH &= ~GPIO_CRH_CNF9;
+	//GPIOE->CRH |= GPIO_CRH_CNF9_1;
+	//GPIOE->OTYPE = 0;
+
 	TIM1->PSC = 0; //предделитель
-	TIM1->CCMR1 |= TIM_CCMR1_OC1M;
+	//TIM1->CCMR1 |= TIM_CCMR1_OC1M;
 	TIM1->ARR = 10000; //рег авто перегрузки
 	TIM1->CCR1 = 5000; //коэф заполнения шим
 
-	TIM1->CR1 |= TIM_CR1_ARPE; // включить авто перегрузку
-	TIM1->CCER |= TIM_CCER_CC1E; //вкл режим захвата/сравнения
-	TIM1->DIER |= TIM_DIER_CC1IE; //прерывание захвата/сравнения
+	TIM1->CCER |= TIM_CCER_CC1E; //вкл режим захвата/сравнения 1 канала
+	TIM1->BDTR |= TIM_BDTR_MOE; //вывод таймера как выход
+	TIM1->CCMR1 = TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1; //PWM mode 1, прямой ШИМ 1 канал
+	TIM1->CR1 &= ~TIM_CR1_DIR; //вверх счёт
+	TIM1->CR1 &= ~TIM_CR1_CMS; //выровнить по фронту
+
+	//TIM1->CR1 |= TIM_CR1_ARPE; // включить авто перегрузку
+
+	//TIM1->DIER |= TIM_DIER_CC1IE; //прерывание захвата/сравнения
 	//TIM4->SR |=
 	TIM1->CR1 |= TIM_CR1_CEN; //включение таймера
 }
