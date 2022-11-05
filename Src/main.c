@@ -97,10 +97,12 @@ int main(void)
 
 		if ((GPIOA->IDR & (1<<0)) != 0){
 			GPIOD->ODR |= 1<<15;
-			delay_ms(1000);
+			TIM1->CCR1 = 100;
+			//delay_ms(1000);
 		}
 		else {
 			GPIOD->ODR &= ~(1<<15);
+			TIM1->CCR1 = 50;
 		}
 
 		__asm("nop");
@@ -109,17 +111,19 @@ int main(void)
 
 void timInit()
 {
-	GPIOE->MODER |= (0b11<<18); //PE9 альтернативная функция
-	GPIOE->AFR[1] |= (0b1<<4);  //тип альтернативной функции AF2 TIM1_CH1
-
+	GPIOE->MODER |= (0b10<<18); //PE9 альтернативная функция
+	GPIOE->AFR[1] |= (0b1<<4);  //тип альтернативной функции AF1 TIM1_CH1
+	GPIOE->OTYPER = 0;
+	GPIOE->PUPDR |= (0b11<<18);
 	//GPIOE->CRH &= ~GPIO_CRH_CNF9;
 	//GPIOE->CRH |= GPIO_CRH_CNF9_1;
-	//GPIOE->OTYPE = 0;
 
-	TIM1->PSC = 0; //предделитель
+	RCC->APB2ENR =0xFF;
+
+	TIM1->PSC = 3360-1; //предделитель 168МГц / 50Гц
 	//TIM1->CCMR1 |= TIM_CCMR1_OC1M;
-	TIM1->ARR = 10000; //рег авто перегрузки
-	TIM1->CCR1 = 5000; //коэф заполнения шим
+	TIM1->ARR = 1000-1; //рег авто перегрузки (разряды от деления)
+	TIM1->CCR1 = 50; //коэф заполнения шим
 
 	TIM1->CCER |= TIM_CCER_CC1E; //вкл режим захвата/сравнения 1 канала
 	TIM1->BDTR |= TIM_BDTR_MOE; //вывод таймера как выход
@@ -127,8 +131,9 @@ void timInit()
 	TIM1->CR1 &= ~TIM_CR1_DIR; //вверх счёт
 	TIM1->CR1 &= ~TIM_CR1_CMS; //выровнить по фронту
 
-	//TIM1->CR1 |= TIM_CR1_ARPE; // включить авто перегрузку
+	TIM1->CR1 |= TIM_CR1_ARPE; // включить авто перегрузку
 
+	//TIM1->CCR1
 	//TIM1->DIER |= TIM_DIER_CC1IE; //прерывание захвата/сравнения
 	//TIM4->SR |=
 	TIM1->CR1 |= TIM_CR1_CEN; //включение таймера
