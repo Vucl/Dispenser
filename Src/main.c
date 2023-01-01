@@ -97,12 +97,12 @@ int main(void)
 
 		if ((GPIOA->IDR & (1<<0)) != 0){
 			GPIOD->ODR |= 1<<15;
-			TIM1->CCR1 = 100;
+			TIM1->CCR1 = 72;
 			//delay_ms(1000);
 		}
 		else {
 			GPIOD->ODR &= ~(1<<15);
-			TIM1->CCR1 = 50;
+			TIM1->CCR1 = 94;
 		}
 
 		__asm("nop");
