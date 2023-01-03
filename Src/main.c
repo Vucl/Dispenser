@@ -115,6 +115,13 @@ int main(void)
 		}
 
 		__asm("nop");
+
+		key = keyboard();
+		if (key != 0){
+			TIM1->CCR1 = 72;
+			delay_ms(key*100);
+			TIM1->CCR1 = 94;
+		}
 	}
 }
 
@@ -162,4 +169,18 @@ void delay_ms(uint16_t delay)
 uint32_t keyboard (void)
 {
 	GPIOD->ODR |= 1<<1;
+
+	if ((GPIOA->IDR & (1<<10)) != 0){
+		return 1;
+	}
+	if ((GPIOA->IDR & (1<<12)) != 0){
+		return 2;
+	}
+	if ((GPIOA->IDR & (1<<14)) != 0){
+		return 3;
+	}
+	if ((GPIOA->IDR & (1<<16)) != 0){
+		return 4;
+	}
+	return 0;
 }
