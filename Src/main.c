@@ -94,11 +94,14 @@ int main(void)
 	GPIOA->MODER &= ~(0b11<<0); // PA0 на вход
 
 	//клавиатура настройка gpio
-	GPIOD->MODER |= (1<<2) | (1<<4) | (1<<6) | (1<<8); //на вывод
+	//GPIOD->MODER |= (1<<1) | (1<<4) | (1<<6) | (1<<8); //на вывод
+	GPIOC->MODER |= (1<<24);
+	GPIOA->MODER &= ~(0b11<<9);
 	GPIOA->MODER &= ~(0b11<<10);
-	GPIOA->MODER &= ~(0b11<<12);
+	GPIOA->MODER &= ~(0b11<<13);
 	GPIOA->MODER &= ~(0b11<<14);
-	GPIOA->MODER &= ~(0b11<<16);
+
+	GPIOA->PUPDR |= (0b10<<18) | (0b10<<20) | (0b10<<26) | (0b10<<28);
 
 	GPIOD->ODR = 0xF000;
 	while(28)
@@ -117,11 +120,15 @@ int main(void)
 		__asm("nop");
 
 		key = keyboard();
+		/*
 		if (key != 0){
 			TIM1->CCR1 = 72;
-			delay_ms(key*100);
+			delay_ms(1000);
 			TIM1->CCR1 = 94;
+			key = 0;
 		}
+		*/
+
 	}
 }
 
@@ -168,18 +175,18 @@ void delay_ms(uint16_t delay)
 
 uint32_t keyboard (void)
 {
-	GPIOD->ODR |= 1<<1;
+	GPIOC->ODR |= 1<<12;
 
-	if ((GPIOA->IDR & (1<<10)) != 0){
+	if ((GPIOA->IDR & (1<<9)) != 0){
 		return 1;
 	}
-	if ((GPIOA->IDR & (1<<12)) != 0){
+	if ((GPIOA->IDR & (1<<10)) != 0){
 		return 2;
 	}
-	if ((GPIOA->IDR & (1<<14)) != 0){
+	if ((GPIOA->IDR & (1<<13)) != 0){
 		return 3;
 	}
-	if ((GPIOA->IDR & (1<<16)) != 0){
+	if ((GPIOA->IDR & (1<<14)) != 0){
 		return 4;
 	}
 	return 0;
