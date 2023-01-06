@@ -27,10 +27,10 @@
 
 void delay_ms(uint16_t delay);
 void timInit(void);
-uint32_t keyboard (void);
+uint8_t keyboard (void);
 
 uint16_t delay_count=0;
-uint32_t key=0;
+uint8_t key=0;
 
 /*
 typedef struct
@@ -95,13 +95,18 @@ int main(void)
 
 	//клавиатура настройка gpio
 	//GPIOD->MODER |= (1<<1) | (1<<4) | (1<<6) | (1<<8); //на вывод
-	GPIOC->MODER |= (1<<24);
-	GPIOA->MODER &= ~(0b11<<9);
-	GPIOA->MODER &= ~(0b11<<10);
-	GPIOA->MODER &= ~(0b11<<13);
-	GPIOA->MODER &= ~(0b11<<14);
+	GPIOD->MODER |= (1<<0);
+	GPIOD->MODER &= ~(0b11<<2);
+	GPIOD->MODER &= ~(0b11<<4);
+	GPIOD->MODER &= ~(0b11<<6);
+	//GPIOA->MODER &= ~(0b11<<14);
 
-	GPIOA->PUPDR |= (0b10<<18) | (0b10<<20) | (0b10<<26) | (0b10<<28);
+	//GPIOA->PUPDR &= ~(0b11<<18) | ~(0b11<<20) | ~(0b11<<26) | ~(0b11<<28);
+	GPIOD->PUPDR &= ~(0b11<<2);
+	GPIOD->PUPDR &= ~(0b11<<4);
+	GPIOD->PUPDR &= ~(0b11<<6);
+	//GPIOA->PUPDR &= ~(0b11<<28);
+	GPIOD->PUPDR |= (0b10<<2) | (0b10<<4) | (0b10<<6);
 
 	GPIOD->ODR = 0xF000;
 	while(28)
@@ -120,6 +125,7 @@ int main(void)
 		__asm("nop");
 
 		key = keyboard();
+		//delay_ms(500);
 		/*
 		if (key != 0){
 			TIM1->CCR1 = 72;
@@ -173,21 +179,27 @@ void delay_ms(uint16_t delay)
 	while(delay_count) {};
 }
 
-uint32_t keyboard (void)
+uint8_t keyboard (void)
 {
-	GPIOC->ODR |= 1<<12;
+	uint8_t result = 0;
+	GPIOD->ODR |= 1<<0;
 
-	if ((GPIOA->IDR & (1<<9)) != 0){
+	if ((GPIOD->IDR & (1<<1)) != 0){
+		//result = 1;
 		return 1;
 	}
-	if ((GPIOA->IDR & (1<<10)) != 0){
+	if ((GPIOD->IDR & (1<<2)) != 0){
+		//result = 2;
 		return 2;
 	}
-	if ((GPIOA->IDR & (1<<13)) != 0){
-		return 3;
+	/*
+	if ((GPIOD->IDR & (1<<3)) != 0){
+		result = 3;
 	}
 	if ((GPIOA->IDR & (1<<14)) != 0){
 		return 4;
 	}
-	return 0;
+	*/
+	GPIOD->ODR &= ~(1<<0);
+	return result;
 }
