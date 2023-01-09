@@ -102,6 +102,7 @@ int main(void)
 	//GPIOA->MODER &= ~(0b11<<14);
 
 	//GPIOA->PUPDR &= ~(0b11<<18) | ~(0b11<<20) | ~(0b11<<26) | ~(0b11<<28);
+	//GPIOD->PUPDR &= ~(0b11<<0);
 	GPIOD->PUPDR &= ~(0b11<<2);
 	GPIOD->PUPDR &= ~(0b11<<4);
 	GPIOD->PUPDR &= ~(0b11<<6);
@@ -126,14 +127,14 @@ int main(void)
 
 		key = keyboard();
 		//delay_ms(500);
-		/*
+
 		if (key != 0){
 			TIM1->CCR1 = 72;
-			delay_ms(1000);
+			delay_ms(1000*key);
 			TIM1->CCR1 = 94;
 			key = 0;
 		}
-		*/
+
 
 	}
 }
@@ -186,10 +187,14 @@ uint8_t keyboard (void)
 
 	if ((GPIOD->IDR & (1<<1)) != 0){
 		//result = 1;
+		while ((GPIOD->IDR & (1<<1)) != 0)
+		{}
 		return 1;
 	}
 	if ((GPIOD->IDR & (1<<2)) != 0){
 		//result = 2;
+		while ((GPIOD->IDR & (1<<2)) != 0)
+		{}
 		return 2;
 	}
 	/*
