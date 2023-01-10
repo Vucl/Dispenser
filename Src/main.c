@@ -31,6 +31,10 @@ uint8_t keyboard (void);
 
 uint16_t delay_count=0;
 uint8_t key=0;
+const uint8_t keysArrNum[3][3] = {
+		{1,2,3},
+		{4,5,6},
+		{7,8,9}};
 
 /*
 typedef struct
@@ -94,13 +98,20 @@ int main(void)
 	GPIOA->MODER &= ~(0b11<<0); // PA0 на вход
 
 	//клавиатура настройка gpio
-	//GPIOD->MODER |= (1<<1) | (1<<4) | (1<<6) | (1<<8); //на вывод
+	//rows PD0..PD3
+	GPIOD->MODER |= (1<<0) | (1<<2) | (1<<4) | (1<<6); //на вывод
+	/*
 	GPIOD->MODER |= (1<<0);
 	GPIOD->MODER &= ~(0b11<<2);
 	GPIOD->MODER &= ~(0b11<<4);
 	GPIOD->MODER &= ~(0b11<<6);
+	*/
 	//GPIOA->MODER &= ~(0b11<<14);
 
+	//columns PD6..PD9
+	GPIOD->MODER &= ~(0b11<<12) | ~(0b11<<14) | ~(0b11<<16) | ~(0b11<<18);
+	GPIOD->PUPDR |= (0b10<<12) | (0b10<<14) | (0b10<<16) | (0b10<<18);
+	/*
 	//GPIOA->PUPDR &= ~(0b11<<18) | ~(0b11<<20) | ~(0b11<<26) | ~(0b11<<28);
 	//GPIOD->PUPDR &= ~(0b11<<0);
 	GPIOD->PUPDR &= ~(0b11<<2);
@@ -108,6 +119,7 @@ int main(void)
 	GPIOD->PUPDR &= ~(0b11<<6);
 	//GPIOA->PUPDR &= ~(0b11<<28);
 	GPIOD->PUPDR |= (0b10<<2) | (0b10<<4) | (0b10<<6);
+	*/
 
 	GPIOD->ODR = 0xF000;
 	while(28)
@@ -183,6 +195,29 @@ void delay_ms(uint16_t delay)
 uint8_t keyboard (void)
 {
 	uint8_t result = 0;
+	uint8_t i = 0;
+	uint8_t j = 0;
+
+	for(i = 0; i <= 30; i++)
+	{
+		GPIOD->ODR |= 1<<i;
+
+		for(j = 0; j <= 2; j++)
+		{
+			if ((GPIOD->IDR & (1<<j)) != 0){
+				while ((GPIOD->IDR & (1<<1)) != 0)
+				{
+					GPIOD->ODR |= 1<<15; // test led
+				}
+				GPIOD->ODR &= ~(1<<15); // test led
+				result = keysArrNum[i][j];
+			}
+		}
+		GPIOD->ODR &= ~(1<<i);
+	}
+
+	return result;
+	/*
 	GPIOD->ODR |= 1<<0;
 
 	if ((GPIOD->IDR & (1<<1)) != 0){
@@ -197,6 +232,7 @@ uint8_t keyboard (void)
 		{}
 		return 2;
 	}
+	*/
 	/*
 	if ((GPIOD->IDR & (1<<3)) != 0){
 		result = 3;
@@ -205,6 +241,8 @@ uint8_t keyboard (void)
 		return 4;
 	}
 	*/
+	/*
 	GPIOD->ODR &= ~(1<<0);
 	return result;
+	*/
 }
