@@ -145,7 +145,7 @@ int main(void)
 
 		if (key != 0){
 			TIM1->CCR1 = 72;
-			delay_ms(1000*key);
+			delay_ms(400*key);
 			TIM1->CCR1 = 94;
 			key = 0;
 		}
@@ -200,14 +200,12 @@ uint8_t keyboard (void)
 	uint8_t result = 0;
 	uint8_t i = 0;
 	uint8_t j = 0;
-	uint8_t row = 0;
-	uint8_t column = 0;
 
-	for(i = keysArrRows[0]; i <= keysArrRows[2]; i++)
+	for(i = 0; i <= 2; i++)
 	{
-		GPIOD->ODR |= 1<<keysArrRows[i];
+		GPIOD->ODR |= 1<<i;
 
-		for(j = keysArrColumns[0]; j <= keysArrColumns[2]; j++)
+		for(j = 0; j <= 2; j++)
 		{
 			if ((GPIOD->IDR & (1<<keysArrColumns[j])) != 0){
 				while ((GPIOD->IDR & (1<<keysArrColumns[j])) != 0)
@@ -215,12 +213,10 @@ uint8_t keyboard (void)
 					GPIOD->ODR |= 1<<15; // test led
 				}
 				GPIOD->ODR &= ~(1<<15); // test led
-				result = keysArrNames[row][column];
+				result = keysArrNames[i][j];
 			}
-			column++;
 		}
-		row++;
-		GPIOD->ODR &= ~(1<<keysArrRows[i]);
+		GPIOD->ODR &= ~(1<<i);
 	}
 
 	return result;
