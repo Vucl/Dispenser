@@ -31,10 +31,13 @@ uint8_t keyboard (void);
 
 uint16_t delay_count=0;
 uint8_t key=0;
-const uint8_t keysArrNum[3][3] = {
+const uint8_t keysArrNames[3][3] = {
 		{1,2,3},
 		{4,5,6},
 		{7,8,9}};
+
+const uint8_t keysArrRows[4] = {0,1,2,3};
+const uint8_t keysArrColumns[4] = {8,9,10,11};
 
 /*
 typedef struct
@@ -108,9 +111,9 @@ int main(void)
 	*/
 	//GPIOA->MODER &= ~(0b11<<14);
 
-	//columns PD6..PD9
-	GPIOD->MODER &= ~(0b11<<12) | ~(0b11<<14) | ~(0b11<<16) | ~(0b11<<18);
-	GPIOD->PUPDR |= (0b10<<12) | (0b10<<14) | (0b10<<16) | (0b10<<18);
+	//columns PD8..PD11
+	GPIOD->MODER &= ~(0b11<<16) | ~(0b11<<18) | ~(0b11<<20) | ~(0b11<<22);
+	GPIOD->PUPDR |= (0b10<<16) | (0b10<<18) | (0b10<<20) | (0b10<<22);
 	/*
 	//GPIOA->PUPDR &= ~(0b11<<18) | ~(0b11<<20) | ~(0b11<<26) | ~(0b11<<28);
 	//GPIOD->PUPDR &= ~(0b11<<0);
@@ -197,23 +200,27 @@ uint8_t keyboard (void)
 	uint8_t result = 0;
 	uint8_t i = 0;
 	uint8_t j = 0;
+	uint8_t row = 0;
+	uint8_t column = 0;
 
-	for(i = 0; i <= 30; i++)
+	for(i = keysArrRows[0]; i <= keysArrRows[2]; i++)
 	{
-		GPIOD->ODR |= 1<<i;
+		GPIOD->ODR |= 1<<keysArrRows[i];
 
-		for(j = 0; j <= 2; j++)
+		for(j = keysArrColumns[0]; j <= keysArrColumns[2]; j++)
 		{
-			if ((GPIOD->IDR & (1<<j)) != 0){
-				while ((GPIOD->IDR & (1<<1)) != 0)
+			if ((GPIOD->IDR & (1<<keysArrColumns[j])) != 0){
+				while ((GPIOD->IDR & (1<<keysArrColumns[j])) != 0)
 				{
 					GPIOD->ODR |= 1<<15; // test led
 				}
 				GPIOD->ODR &= ~(1<<15); // test led
-				result = keysArrNum[i][j];
+				result = keysArrNames[row][column];
 			}
+			column++;
 		}
-		GPIOD->ODR &= ~(1<<i);
+		row++;
+		GPIOD->ODR &= ~(1<<keysArrRows[i]);
 	}
 
 	return result;
