@@ -31,6 +31,8 @@ uint8_t keyboard (void);
 
 uint16_t delay_count=0;
 uint8_t key=0;
+uint32_t counter=0;
+
 const uint8_t keysArrNames[3][3] = {
 		{1,2,3},
 		{4,5,6},
@@ -124,10 +126,17 @@ int main(void)
 	GPIOD->PUPDR |= (0b10<<2) | (0b10<<4) | (0b10<<6);
 	*/
 
+	//настройка спящего
+	SCB->SCR |= 1<<2; // разрешение sleepdeep
+	PWR->CR |= PWR_CR_PDDS; // выбор Power Down Deepsleep
+	PWR->CR |= PWR_CR_CWUF; // очистка wakeup flag
+	PWR->CSR |= PWR_CSR_EWUP; // разрешить вэйкап по еденице на А0
+	//__WFE();
+
 	GPIOD->ODR = 0xF000;
 	while(28)
 	{
-
+		/*
 		if ((GPIOA->IDR & (1<<0)) != 0){
 			GPIOD->ODR |= 1<<15;
 			TIM1->CCR1 = 72;
@@ -137,7 +146,7 @@ int main(void)
 			GPIOD->ODR &= ~(1<<15);
 			TIM1->CCR1 = 94;
 		}
-
+		*/
 		__asm("nop");
 
 		key = keyboard();
@@ -148,9 +157,14 @@ int main(void)
 			delay_ms(400*key);
 			TIM1->CCR1 = 94;
 			key = 0;
+			counter = 0;
 		}
+		else { counter++; }
 
-
+		if (counter == 0xFFFFF) {
+			counter = 0;
+			__WFE();
+		}
 	}
 }
 
@@ -222,7 +236,6 @@ uint8_t keyboard (void)
 	return result;
 	/*
 	GPIOD->ODR |= 1<<0;
-
 	if ((GPIOD->IDR & (1<<1)) != 0){
 		//result = 1;
 		while ((GPIOD->IDR & (1<<1)) != 0)
