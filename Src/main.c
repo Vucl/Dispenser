@@ -161,9 +161,15 @@ int main(void)
 		}
 		else { counter++; }
 
-		if (counter == 0xFFFFF) {
+		if (counter == 0xFFFF) {
 			counter = 0;
-			__WFE();
+			while ((GPIOA->IDR & (1<<0)) == 0)
+			{
+				__WFE();
+				PWR->CR |= PWR_CR_CWUF;
+				__WFE();
+				//__asm("nop");
+			}
 		}
 	}
 }
