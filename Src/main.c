@@ -105,26 +105,9 @@ int main(void)
 	//клавиатура настройка gpio
 	//rows PD0..PD3
 	GPIOD->MODER |= (1<<0) | (1<<2) | (1<<4) | (1<<6); //на вывод
-	/*
-	GPIOD->MODER |= (1<<0);
-	GPIOD->MODER &= ~(0b11<<2);
-	GPIOD->MODER &= ~(0b11<<4);
-	GPIOD->MODER &= ~(0b11<<6);
-	*/
-	//GPIOA->MODER &= ~(0b11<<14);
-
 	//columns PD8..PD11
 	GPIOD->MODER &= ~(0b11<<16) | ~(0b11<<18) | ~(0b11<<20) | ~(0b11<<22);
 	GPIOD->PUPDR |= (0b10<<16) | (0b10<<18) | (0b10<<20) | (0b10<<22);
-	/*
-	//GPIOA->PUPDR &= ~(0b11<<18) | ~(0b11<<20) | ~(0b11<<26) | ~(0b11<<28);
-	//GPIOD->PUPDR &= ~(0b11<<0);
-	GPIOD->PUPDR &= ~(0b11<<2);
-	GPIOD->PUPDR &= ~(0b11<<4);
-	GPIOD->PUPDR &= ~(0b11<<6);
-	//GPIOA->PUPDR &= ~(0b11<<28);
-	GPIOD->PUPDR |= (0b10<<2) | (0b10<<4) | (0b10<<6);
-	*/
 
 	//настройка спящего
 	SCB->SCR |= 1<<2; // разрешение sleepdeep
@@ -160,7 +143,7 @@ int main(void)
 			counter = 0;
 		}
 		else { counter++; }
-
+/*
 		if (counter == 0xFFFF) {
 			counter = 0;
 			while ((GPIOA->IDR & (1<<0)) == 0)
@@ -170,7 +153,7 @@ int main(void)
 				__WFE();
 				//__asm("nop");
 			}
-		}
+		}*/
 	}
 }
 
@@ -240,31 +223,4 @@ uint8_t keyboard (void)
 	}
 
 	return result;
-	/*
-	GPIOD->ODR |= 1<<0;
-	if ((GPIOD->IDR & (1<<1)) != 0){
-		//result = 1;
-		while ((GPIOD->IDR & (1<<1)) != 0)
-		{}
-		return 1;
-	}
-	if ((GPIOD->IDR & (1<<2)) != 0){
-		//result = 2;
-		while ((GPIOD->IDR & (1<<2)) != 0)
-		{}
-		return 2;
-	}
-	*/
-	/*
-	if ((GPIOD->IDR & (1<<3)) != 0){
-		result = 3;
-	}
-	if ((GPIOA->IDR & (1<<14)) != 0){
-		return 4;
-	}
-	*/
-	/*
-	GPIOD->ODR &= ~(1<<0);
-	return result;
-	*/
 }
