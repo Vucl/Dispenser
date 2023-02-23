@@ -32,11 +32,13 @@ uint8_t keyboard (void);
 uint16_t delay_count=0;
 uint8_t key=0;
 uint32_t counter=0;
+uint8_t mode=0;
 
-const uint8_t keysArrNames[3][3] = {
-		{1,2,3},
-		{4,5,6},
-		{7,8,9}};
+const uint8_t keysArrNames[4][4] = {
+		{1,2,3,10},
+		{4,5,6,11},
+		{7,8,9,12},
+		{14,15,16,13}};
 
 const uint8_t keysArrRows[4] = {0,1,2,3};
 const uint8_t keysArrColumns[4] = {8,9,10,11};
@@ -135,7 +137,28 @@ int main(void)
 		key = keyboard();
 		//delay_ms(500);
 
-		if (key != 0){
+		if ((key != 0)&&(key < 10)) {
+			switch (key)
+			{
+				case 10:
+					mode = 1;
+					//only cof led on
+					break;
+				case 11:
+					mode = 2;
+					//only the led on
+					break;
+				case 12:
+					mode = 3;
+					//only sug led on
+					break;
+				case 13:
+					mode = 4;
+					break;
+				default:
+					mode = 0;
+					break;
+			}
 			TIM1->CCR1 = 72;
 			delay_ms(400*key);
 			TIM1->CCR1 = 94;
@@ -204,11 +227,11 @@ uint8_t keyboard (void)
 	uint8_t i = 0;
 	uint8_t j = 0;
 
-	for(i = 0; i <= 2; i++)
+	for(i = 0; i <= 3; i++)
 	{
 		GPIOD->ODR |= 1<<i;
 
-		for(j = 0; j <= 2; j++)
+		for(j = 0; j <= 3; j++)
 		{
 			if ((GPIOD->IDR & (1<<keysArrColumns[j])) != 0){
 				while ((GPIOD->IDR & (1<<keysArrColumns[j])) != 0)
