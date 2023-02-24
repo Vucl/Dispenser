@@ -25,6 +25,9 @@
 #define SysTicksClk	1000
 #define SysTicks	HCLK/SysTicksClk
 
+//светодиоды
+#define LEDREDON	GPIOD->ODR|=1<<12
+
 void delay_ms(uint16_t delay);
 void timInit(void);
 uint8_t keyboard (void);
@@ -33,6 +36,7 @@ uint16_t delay_count=0;
 uint8_t key=0;
 uint32_t counter=0;
 uint8_t mode=0;
+enum {COFFEE=10, THE, SUCRE};
 
 const uint8_t keysArrNames[4][4] = {
 		{1,2,3,10},
@@ -141,15 +145,16 @@ int main(void)
 			switch (key)
 			{
 				case 10:
-					mode = 1;
+					mode = COFFEE;
+					LEDREDON;
 					//only cof led on
 					break;
 				case 11:
-					mode = 2;
+					mode = THE;
 					//only the led on
 					break;
 				case 12:
-					mode = 3;
+					mode = SUCRE;
 					//only sug led on
 					break;
 				case 13:
