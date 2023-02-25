@@ -34,12 +34,14 @@ void delay_ms(uint16_t delay);
 void timInit(void);
 uint8_t keyboard (void);
 void displayMode(uint8_t mode);
+void dispensing(uint8_t key, uint8_t mode);
 
 uint16_t delay_count=0;
 uint8_t key=0;
 uint32_t counter=0;
 uint8_t mode=0;
 enum {COFFEE=10, THE, SUCRE};
+uint8_t servoDirection = 0;
 
 const uint8_t keysArrNames[4][4] = {
 		{1,2,3,10},
@@ -149,12 +151,15 @@ int main(void)
 			{
 				case 10:
 					mode = COFFEE;
+					servoDirection = 72;
 					break;
 				case 11:
 					mode = THE;
+					servoDirection = 94;
 					break;
 				case 12:
 					mode = SUCRE;
+					servoDirection = 116;
 					break;
 				case 13:
 					mode = 4;
@@ -163,9 +168,9 @@ int main(void)
 					//mode = 0;
 					break;
 			}
-
+			//dispensing(key, mode);
 			if ((key < 10)&&(mode!=0)) {
-				TIM1->CCR1 = 72;
+				TIM1->CCR1 = servoDirection;
 				delay_ms(400*key);
 				TIM1->CCR1 = 94;
 				key = 0;
@@ -274,4 +279,10 @@ void displayMode (uint8_t mode)
 		default:
 			break;
 	}
+}
+
+
+void dispensing (uint8_t key, uint8_t mode)
+{
+
 }
