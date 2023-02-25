@@ -26,11 +26,14 @@
 #define SysTicks	HCLK/SysTicksClk
 
 //светодиоды
-#define LEDREDON	GPIOD->ODR|=1<<12
+#define LEDGREENON	GPIOD->ODR|=1<<12
+#define LEDYELLOWON	GPIOD->ODR|=1<<13
+#define LEDREDON	GPIOD->ODR|=1<<14
 
 void delay_ms(uint16_t delay);
 void timInit(void);
 uint8_t keyboard (void);
+void displayMode(uint8_t mode);
 
 uint16_t delay_count=0;
 uint8_t key=0;
@@ -141,34 +144,35 @@ int main(void)
 		key = keyboard();
 		//delay_ms(500);
 
-		if ((key != 0)&&(key < 10)) {
+		if (key != 0) {
 			switch (key)
 			{
 				case 10:
 					mode = COFFEE;
-					LEDREDON;
-					//only cof led on
 					break;
 				case 11:
 					mode = THE;
-					//only the led on
 					break;
 				case 12:
 					mode = SUCRE;
-					//only sug led on
 					break;
 				case 13:
 					mode = 4;
 					break;
 				default:
-					mode = 0;
+					//mode = 0;
 					break;
 			}
-			TIM1->CCR1 = 72;
-			delay_ms(400*key);
-			TIM1->CCR1 = 94;
-			key = 0;
-			counter = 0;
+
+			if ((key < 10)&&(mode!=0)) {
+				TIM1->CCR1 = 72;
+				delay_ms(400*key);
+				TIM1->CCR1 = 94;
+				key = 0;
+				counter = 0;
+				mode = 0;
+			}
+			displayMode(mode);
 		}
 		else { counter++; }
 /*
@@ -251,4 +255,23 @@ uint8_t keyboard (void)
 	}
 
 	return result;
+}
+
+void displayMode (uint8_t mode)
+{
+	GPIOD->ODR = 0x0;//turn off leds
+	switch (mode)
+	{
+		case COFFEE:
+			LEDREDON;
+			break;
+		case THE:
+			LEDGREENON;
+			break;
+		case SUCRE:
+			LEDYELLOWON;
+			break;
+		default:
+			break;
+	}
 }
